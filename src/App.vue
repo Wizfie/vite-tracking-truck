@@ -38,7 +38,10 @@ onMounted(() => {
       :is-dark-mode="isDarkMode"
       @toggle-dark="toggleDark"
     />
-    <div class="bg-white dark:bg-gray-900 px-4 py-6">
+    <div
+      class="bg-white dark:bg-gray-900 px-4 py-6"
+      style="z-index: 1; position: relative"
+    >
       <RouterView />
     </div>
   </div>

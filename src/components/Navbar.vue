@@ -19,7 +19,7 @@ const handleToggleDark = () => {
 </script>
 
 <template>
-  <nav class="bg-white shadow-xl sticky dark:bg-gray-800">
+  <nav class="bg-white shadow-xl sticky top-0 z-50 dark:bg-gray-800">
     <div
       class="container px-4 py-4 mx-auto md:flex md:justify-between md:items-center"
     >
