@@ -15,25 +15,29 @@ const login = async () => {
       console.error("Username and password are required.");
       return;
     }
+    const response = await axios.post(
+      "/api/auth/login",
+      {
+        username: username.value,
+        password: password.value,
+      },
+      { withCredentials: true } // penting agar cookie httpOnly dikirim
+    );
 
-    const response = await axios.post("/api/auth/login", {
-      username: username.value,
-      password: password.value,
-    });
-
-    const token = response.data.token;
     const user = response.data.user;
-    console.log("TOKEN : " + response.data.token);
-
-    authStore.setToken(token);
     authStore.setUser(user);
-
     router.push({ name: "home" });
     alert("Login successful:");
   } catch (error) {
     console.error("Login failed:", error);
     alert("Login failed:");
   }
+};
+
+const logout = async () => {
+  await axios.post("/api/auth/logout", {}, { withCredentials: true });
+  authStore.clearUser();
+  router.push({ name: "login" });
 };
 </script>
 <template>

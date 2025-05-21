@@ -1,5 +1,6 @@
 import { useAuthStore } from "@/stores/store.js";
 import { createRouter, createWebHistory } from "vue-router";
+import axios from "axios";
 
 export const excludedPaths = ["login", "register", "not-found"];
 
@@ -29,19 +30,29 @@ export const router = createRouter({
   ],
 });
 
-router.beforeEach((to, from, next) => {
+router.beforeEach(async (to, from, next) => {
   const authStore = useAuthStore();
-  const token = authStore.token;
-  const user = authStore.user;
+  let user = authStore.user;
 
   if (to.meta.requiredAuth) {
-    if (!token || !user) {
-      next({ name: "login" });
-    } else if (to.meta.requiredRole && user.role !== to.meta.requiredRole) {
-      next({ name: "login" });
-    } else {
-      next();
+    if (!user) {
+      // Cek session ke backend jika user belum ada di state
+      try {
+        const res = await axios.get("/api/auth/validate", {
+          withCredentials: true,
+        });
+        if (res.data && res.data.valid && res.data.user) {
+          authStore.setUser(res.data.user);
+          user = res.data.user;
+        } else {
+          return next({ name: "login" });
+        }
+      } catch {
+        return next({ name: "login" });
+      }
     }
+    // Optionally: cek role user di sini jika perlu
+    next();
   } else {
     next();
   }
