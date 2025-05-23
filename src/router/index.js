@@ -22,6 +22,12 @@ export const router = createRouter({
       name: "login",
       component: () => import("@/views/LoginView.vue"),
     },
+    // {
+    //   path: "/admin",
+    //   name: "admin",
+    //   component: () => import("@/views/AdminView.vue"),
+    //   meta: { requiredAuth: true, requiredRole: "admin" },
+    // },
     {
       path: "/:pathMatch(.*)*",
       name: "not-found",
@@ -33,6 +39,10 @@ export const router = createRouter({
 router.beforeEach(async (to, from, next) => {
   const authStore = useAuthStore();
   let user = authStore.user;
+
+  if (to.name === "login" && user) {
+    return next({ name: "home" });
+  }
 
   if (to.meta.requiredAuth) {
     if (!user) {
@@ -51,7 +61,10 @@ router.beforeEach(async (to, from, next) => {
         return next({ name: "login" });
       }
     }
-    // Optionally: cek role user di sini jika perlu
+    // Cek role user jika route butuh role tertentu
+    if (to.meta.requiredRole && user.role !== to.meta.requiredRole) {
+      return next({ name: "not-found" });
+    }
     next();
   } else {
     next();

@@ -1,5 +1,8 @@
 <template>
-  <div id="map" class="w-full md:w-1/2 h-[400px]"></div>
+  <div class="w-full md:w-1/2 mx-auto">
+    <h2 class="text-2xl font-bold mb-4">Maps</h2>
+    <div id="map" class="h-[150px] md:h-[500px] border-2 rounded-sm"></div>
+  </div>
 </template>
 
 <script setup>
