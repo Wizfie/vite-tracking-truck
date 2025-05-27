@@ -1,5 +1,8 @@
 <script setup>
-import { ref } from "vue";
+import { ref, computed } from "vue";
+import { useAuthStore } from "@/stores/store";
+import { useRouter } from "vue-router";
+import axios from "axios";
 
 const props = defineProps({
   isDarkMode: {
@@ -8,6 +11,8 @@ const props = defineProps({
 });
 const emit = defineEmits(["toggle-dark"]);
 const isOpen = ref(false);
+const authStore = useAuthStore();
+const router = useRouter();
 
 const toggleMenu = () => {
   isOpen.value = !isOpen.value;
@@ -15,6 +20,14 @@ const toggleMenu = () => {
 
 const handleToggleDark = () => {
   emit("toggle-dark");
+};
+
+const isLoggedIn = computed(() => !!authStore.user);
+
+const logout = async () => {
+  await axios.post("/api/auth/logout", {}, { withCredentials: true });
+  authStore.clearUser();
+  router.push({ name: "login" });
 };
 </script>
 
@@ -90,6 +103,13 @@ const handleToggleDark = () => {
             href="#"
             >Chat</a
           >
+          <button
+            v-if="isLoggedIn"
+            @click="logout"
+            class="text-red-600 font-semibold border-b-2 border-transparent hover:border-red-600 p-2 rounded-md transition-all duration-300"
+          >
+            Logout
+          </button>
         </div>
 
         <!-- Dark Mode Toggle Button (Desktop) -->
@@ -195,6 +215,13 @@ const handleToggleDark = () => {
                 d="M21 12.79A9 9 0 1111.21 3a7 7 0 109.79 9.79z"
               />
             </svg>
+          </button>
+          <button
+            v-if="isLoggedIn"
+            @click="logout"
+            class="text-red-600 font-bold bg-gray-200 dark:bg-slate-500 p-2 rounded-md dark:text-gray-200 hover:text-red-700 dark:hover:text-red-400"
+          >
+            Logout
           </button>
         </div>
       </div>

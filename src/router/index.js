@@ -12,15 +12,21 @@ export const router = createRouter({
       redirect: "/login",
     },
     {
+      path: "/login",
+      name: "login",
+      component: () => import("@/views/LoginView.vue"),
+    },
+    {
       path: "/home",
       name: "home",
       component: () => import("@/views/HomeView.vue"),
       meta: { requiredAuth: true },
     },
     {
-      path: "/login",
-      name: "login",
-      component: () => import("@/views/LoginView.vue"),
+      path: "/driver",
+      name: "driver",
+      component: () => import("@/views/DriverView.vue"),
+      meta: { requiredAuth: true },
     },
     // {
     //   path: "/admin",

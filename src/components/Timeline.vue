@@ -9,11 +9,15 @@
           <span class="size-3 shrink-0 rounded-full bg-blue-600"></span>
 
           <div class="-mt-2">
-            <time class="text-md font-medium text-gray-800">12/02/2025</time>
+            <time class="text-sm font-medium text-gray-800 dark:text-white"
+              >12/02/2025</time
+            >
 
-            <h3 class="text-lg font-bold text-gray-900">Mulai</h3>
+            <h3 class="text-lg font-bold text-gray-900 dark:text-white">
+              Mulai
+            </h3>
 
-            <p class="mt-0.5 text-sm text-gray-700">
+            <p class="mt-0.5 text-sm text-gray-700 dark:text-white">
               Lorem ipsum dolor sit amet consectetur adipisicing elit. Fuga
             </p>
           </div>
@@ -23,13 +27,15 @@
           <span class="size-3 shrink-0 rounded-full bg-blue-600"></span>
 
           <div class="-mt-2">
-            <time class="text-xs/none font-medium text-gray-700"
+            <time class="text-sm font-medium text-gray-700 dark:text-white"
               >15/03/2025</time
             >
 
-            <h3 class="text-lg font-bold text-gray-900">First Milestone</h3>
+            <h3 class="text-lg font-bold text-gray-900 dark:text-white">
+              First Milestone
+            </h3>
 
-            <p class="mt-0.5 text-sm text-gray-700">
+            <p class="mt-0.5 text-sm text-gray-700 dark:text-gray-100">
               Lorem ipsum dolor sit amet consectetur adipisicing elit. Fuga
               officiis tempora ipsum adipisci tenetur sunt quae exercitationem
               sed pariatur porro!
@@ -41,13 +47,15 @@
           <span class="size-3 shrink-0 rounded-full bg-blue-600"></span>
 
           <div class="-mt-2">
-            <time class="text-xs/none font-medium text-gray-700"
+            <time class="text-sm font-medium text-gray-700 dark:text-white"
               >24/04/2025</time
             >
 
-            <h3 class="text-lg font-bold text-gray-900">Launch</h3>
+            <h3 class="text-lg font-bold text-gray-900 dark:text-white">
+              Launch
+            </h3>
 
-            <p class="mt-0.5 text-sm text-gray-700">
+            <p class="mt-0.5 text-sm text-gray-700 dark:text-white">
               Lorem ipsum dolor sit amet consectetur adipisicing elit. Fuga
               officiis tempora ipsum adipisci tenetur sunt quae exercitationem
               sed pariatur porro!
@@ -58,13 +66,15 @@
           <span class="size-3 shrink-0 rounded-full bg-blue-600"></span>
 
           <div class="-mt-2">
-            <time class="text-xs/none font-medium text-gray-700"
+            <time class="text-sm font-medium text-gray-700 dark:text-white"
               >24/04/2025</time
             >
 
-            <h3 class="text-lg font-bold text-gray-900">Launch</h3>
+            <h3 class="text-lg font-bold text-gray-900 dark:text-white">
+              Launch
+            </h3>
 
-            <p class="mt-0.5 text-sm text-gray-700">
+            <p class="mt-0.5 text-sm text-gray-700 dark:text-white">
               Lorem ipsum dolor sit amet consectetur adipisicing elit. Fuga
               officiis tempora ipsum adipisci tenetur sunt quae exercitationem
               sed pariatur porro!
@@ -75,13 +85,15 @@
           <span class="size-3 shrink-0 rounded-full bg-blue-600"></span>
 
           <div class="-mt-2">
-            <time class="text-xs/none font-medium text-gray-700"
+            <time class="text-sm font-medium text-gray-700 dark:text-white"
               >24/04/2025</time
             >
 
-            <h3 class="text-lg font-bold text-gray-900">Launch</h3>
+            <h3 class="text-lg font-bold text-gray-900 dark:text-white">
+              Launch
+            </h3>
 
-            <p class="mt-0.5 text-sm text-gray-700">
+            <p class="mt-0.5 text-sm text-gray-700 dark:text-white">
               Lorem ipsum dolor sit amet consectetur adipisicing elit. Fuga
               officiis tempora ipsum adipisci tenetur sunt quae exercitationem
               sed pariatur porro!
