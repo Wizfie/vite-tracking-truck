@@ -20,20 +20,20 @@ export const router = createRouter({
       path: "/home",
       name: "home",
       component: () => import("@/views/HomeView.vue"),
-      meta: { requiredAuth: true },
+      meta: { requiredAuth: true, requiredRole: "ADMIN" },
     },
     {
       path: "/driver",
       name: "driver",
       component: () => import("@/views/DriverView.vue"),
+      meta: { requiredAuth: true, requiredRole: "USER" },
+    },
+    {
+      path: "/profile",
+      name: "profile",
+      component: () => import("@/views/ProfileView.vue"),
       meta: { requiredAuth: true },
     },
-    // {
-    //   path: "/admin",
-    //   name: "admin",
-    //   component: () => import("@/views/AdminView.vue"),
-    //   meta: { requiredAuth: true, requiredRole: "admin" },
-    // },
     {
       path: "/:pathMatch(.*)*",
       name: "not-found",
@@ -42,12 +42,23 @@ export const router = createRouter({
   ],
 });
 
+function redirectByRole(user, next) {
+  if (user.role === "ADMIN") {
+    return next({ name: "home" });
+  } else if (user.role === "USER") {
+    return next({ name: "driver" });
+  } else {
+    return next({ name: "not-found" });
+  }
+}
+
 router.beforeEach(async (to, from, next) => {
   const authStore = useAuthStore();
   let user = authStore.user;
 
+  // Jika sudah login dan akses /login, redirect sesuai role
   if (to.name === "login" && user) {
-    return next({ name: "home" });
+    return redirectByRole(user, next);
   }
 
   if (to.meta.requiredAuth) {
@@ -67,9 +78,9 @@ router.beforeEach(async (to, from, next) => {
         return next({ name: "login" });
       }
     }
-    // Cek role user jika route butuh role tertentu
+    // Jika role user tidak cocok dengan route, redirect ke halaman sesuai role
     if (to.meta.requiredRole && user.role !== to.meta.requiredRole) {
-      return next({ name: "not-found" });
+      return redirectByRole(user, next);
     }
     next();
   } else {

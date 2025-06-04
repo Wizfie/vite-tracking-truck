@@ -11,8 +11,9 @@ const props = defineProps({
 });
 const emit = defineEmits(["toggle-dark"]);
 const isOpen = ref(false);
-const authStore = useAuthStore();
 const router = useRouter();
+const authStore = useAuthStore();
+const user = computed(() => authStore.user);
 
 const toggleMenu = () => {
   isOpen.value = !isOpen.value;
@@ -83,20 +84,30 @@ const logout = async () => {
 
         <!-- Desktop Menu Links -->
         <div class="hidden md:flex flex-1 justify-center md:mx-6 space-x-6">
-          <a
+          <router-link
+            :to="{ name: 'home' }"
+            v-if="user?.role === 'ADMIN'"
             class="text-gray-700 transition-all duration-300 transform dark:text-gray-200 hover:text-blue-500 dark:hover:text-blue-400 p-2 rounded-md font-semibold border-b-2 border-transparent hover:border-blue-500"
             href="#"
-            >Home</a
+            >Home</router-link
+          >
+          <router-link
+            :to="{ name: 'driver' }"
+            v-if="user?.role === 'USER'"
+            class="text-gray-700 transition-all duration-300 transform dark:text-gray-200 hover:text-blue-500 dark:hover:text-blue-400 p-2 rounded-md font-semibold border-b-2 border-transparent hover:border-blue-500"
+            href="#"
+            >Home</router-link
           >
           <a
             class="text-gray-700 transition-all duration-300 transform dark:text-gray-200 hover:text-blue-500 dark:hover:text-blue-400 p-2 rounded-md font-semibold border-b-2 border-transparent hover:border-blue-500"
             href="#"
             >History</a
           >
-          <a
+          <router-link
+            :to="{ name: 'profile' }"
             class="text-gray-700 transition-all duration-300 transform dark:text-gray-200 hover:text-blue-500 dark:hover:text-blue-400 p-2 rounded-md font-semibold border-b-2 border-transparent hover:border-blue-500"
             href="#"
-            >Profile</a
+            >Profile</router-link
           >
           <a
             class="text-gray-700 transition-all duration-300 transform dark:text-gray-200 hover:text-blue-500 dark:hover:text-blue-400 p-2 rounded-md font-semibold border-b-2 border-transparent hover:border-blue-500"
@@ -106,7 +117,7 @@ const logout = async () => {
           <button
             v-if="isLoggedIn"
             @click="logout"
-            class="text-red-600 font-semibold border-b-2 border-transparent hover:border-red-600 p-2 rounded-md transition-all duration-300"
+            class="text-red-600 font-semibold cursor-pointer border-b-2 border-transparent hover:border-red-600 p-2 rounded-md transition-all duration-300"
           >
             Logout
           </button>

@@ -26,7 +26,7 @@ const login = async () => {
 
     const user = response.data.user;
     authStore.setUser(user);
-    router.push({ name: "home" });
+    router.replace({ name: "home" }); // Trigger route guard untuk redirect sesuai role
     alert("Login successful:");
   } catch (error) {
     console.error("Login failed:", error);
