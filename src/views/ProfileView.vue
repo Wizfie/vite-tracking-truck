@@ -14,8 +14,11 @@
       <p class="text-gray-600 dark:text-gray-400">profile details here.</p>
     </div>
     <div
-      class="mt-6 bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4 w-full max-w-xl"
+      v-if="!user.role == `ADMIN`"
+      class="mt-6 bg-red-100 dark:bg-red-800 rounded-lg shadow-lg p-4 w-full max-w-xl"
     >
+      class="mt-6 bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4 w-full
+      max-w-xl" >
       <div class="flex flex-col md:flex-row justify-between mb-4 mx-6">
         <h2 class="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-4">
           Daftar Kendaraan

@@ -28,6 +28,7 @@ const isLoggedIn = computed(() => !!authStore.user);
 const logout = async () => {
   await axios.post("/api/auth/logout", {}, { withCredentials: true });
   authStore.clearUser();
+  localStorage.clear();
   router.push({ name: "login" });
 };
 </script>
@@ -98,10 +99,10 @@ const logout = async () => {
             href="#"
             >Home</router-link
           >
-          <a
+          <router-link
+            :to="{ name: 'history-driver' }"
             class="text-gray-700 transition-all duration-300 transform dark:text-gray-200 hover:text-blue-500 dark:hover:text-blue-400 p-2 rounded-md font-semibold border-b-2 border-transparent hover:border-blue-500"
-            href="#"
-            >History</a
+            >History</router-link
           >
           <router-link
             :to="{ name: 'profile' }"

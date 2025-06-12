@@ -12,7 +12,7 @@
             <p>Lokasi: {{ location.latitude }}, {{ location.longitude }}</p>
             <p>Jalan: {{ location.streetName || "Menunggu alamat..." }}</p>
             <p>Kota: {{ location.city || "Tidak diketahui" }}</p>
-            <p>Provinsi: {{ location.state || "Tidak diketahui" }}</p>
+            <p>Kode Pos: {{ location.postcode || "Tidak diketahui" }}</p>
             <b>{{ location.timestamp }}</b>
           </div>
           <p v-if="index === 0" class="font-bold text-green-600 mt-2 md:mt-0">

@@ -35,6 +35,24 @@ export const router = createRouter({
       meta: { requiredAuth: true },
     },
     {
+      path: "/history-driver",
+      name: "history-driver",
+      component: () => import("@/views/HistoryView.vue"),
+      meta: { requiredAuth: true, requiredRole: "USER" },
+    },
+    {
+      path: "/history/checkpoint",
+      name: "checkpoint-detail",
+      component: () => import("@/views/CheckpointDetailView.vue"),
+      meta: { requiredAuth: true, requiredRole: "USER" },
+    },
+    {
+      path: "/trip/:id",
+      name: "trip-detail",
+      component: () => import("@/views/TripDetailView.vue"),
+      meta: { requiredAuth: true },
+    },
+    {
       path: "/:pathMatch(.*)*",
       name: "not-found",
       component: () => import("@/views/NotFound.vue"),
