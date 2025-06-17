@@ -186,7 +186,7 @@
 <script setup>
 import { ref, defineProps, defineEmits } from "vue";
 import { useRouter } from "vue-router";
-import { formatDate } from "@/utils";
+import { formatDate } from "@/utils/utils";
 const router = useRouter();
 const props = defineProps({
   trips: {

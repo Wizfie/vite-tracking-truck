@@ -1,6 +1,16 @@
 <template>
   <div class="flex h-screen bg-[#ece5dd]">
-    <aside :class="classAside">
+    <Loading :is-loading="isLoading" />
+    <!-- Sidebar -->
+    <aside
+      :class="{
+        'w-90': isMobile && sidebarOpen,
+        'w-60': !isMobile || sidebarOpen,
+        'transform translate-x--10': sidebarOpen && isMobile,
+        'transform -translate-x-full': !sidebarOpen && isMobile,
+      }"
+      class="transition-all bg-[#075e54] border border-white dark:bg-gray-900 text-white fixed md:relative ove z-50 h-full"
+    >
       <div class="p-4 border-b border-gray-100">
         <input
           type="text"
@@ -14,41 +24,51 @@
           v-for="chat in filteredChats"
           :key="chat.id"
           @click="selectChat(chat)"
-          class="flex items-center px-4 py-3 cursor-pointer border-b border-gray-100 hover:bg-gray-50"
+          class="flex items-center px-4 py-3 cursor-pointer border-b border-gray-100 hover:bg-gray-400 dark:hover:bg-gray-800 transition-colors"
         >
           <img :src="chat.avatar" class="w-10 h-10 rounded-full mr-4" />
           <div>
             <div class="font-semibold text-sm">{{ chat.name }}</div>
-            <div class="text-xs text-gray-500 truncate max-w-[160px]">
-              {{ chat.lastMessage }}
+            <div class="text-xs text-gray-100 truncate max-w-[160px]">
+              {{ chat.content || chat.lastMessage?.text || "" }}
             </div>
           </div>
         </li>
       </ul>
     </aside>
-    <main class="flex-1 flex flex-col">
-      <header class="bg-[#075e54] text-white p-4 flex items-center">
+
+    <!-- Main content area -->
+    <main class="flex-1 flex flex-col h-full overflow-hidden">
+      <!-- Header -->
+      <header
+        class="bg-[#075e54] dark:bg-gray-900 border border-white text-white p-4 flex items-center sticky top-0 z-40"
+      >
+        <!-- Make header sticky -->
         <button
-          class="mr-4 text-2xl md:hidden"
+          class="mr-4 text-2xl items-center md:hidden"
           v-if="isMobile"
           @click="sidebarOpen = !sidebarOpen"
         >
-          ☰
+          ←
         </button>
         <span v-if="selectedChat" class="font-semibold">
           {{ selectedChat.name }}
         </span>
       </header>
+
+      <!-- Chat content -->
       <section
-        class="flex-1 p-4 overflow-y-auto bg-[#ece5dd] flex flex-col gap-2"
+        v-if="selectedChat"
+        class="flex-1 p-4 overflow-y-auto bg-[#ece5dd] dark:text-white dark:bg-gray-900 flex flex-col gap-2"
+        style="max-height: calc(100vh - 140px)"
       >
         <div
           v-for="msg in selectedChat?.messages || []"
           :key="msg.id"
           :class="{
             'max-w-[60%] px-4 py-2 rounded-lg shadow-sm': true,
-            'bg-[#dcf8c6] self-end': msg.fromMe,
-            'bg-white self-start': !msg.fromMe,
+            'bg-[#dcf8c6] dark:bg-blue-600   self-end': msg.fromMe,
+            'bg-white dark:bg-cyan-500 self-start': !msg.fromMe,
             'opacity-50': msg.status === 'sending',
           }"
         >
@@ -56,9 +76,17 @@
           <div v-if="msg.status === 'sending'" class="text-xs text-gray-500">
             Sending...
           </div>
+          <div class="text-xs">
+            {{ formatTime(msg.createdAt) }}
+          </div>
         </div>
       </section>
-      <footer class="flex p-4 bg-gray-50 border-t border-gray-100">
+
+      <!-- Footer input area -->
+      <footer
+        v-if="selectedChat"
+        class="flex p-5 bg-gray-50 dark:bg-gray-900 border-t sticky bottom-0 z-40"
+      >
         <input
           v-model="newMessage"
           @keyup.enter="sendMessage"
@@ -77,48 +105,35 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onBeforeUnmount, nextTick } from "vue";
+import { ref, computed, onMounted, onBeforeUnmount } from "vue";
 import { useAuthStore } from "../stores/store";
 import axios from "axios";
-import socket from "../utils/socket"; // Pastikan ini mengimpor socket.io-client
+import socket from "../utils/socket";
+import { formatTime } from "@/utils/utils";
+import Loading from "@/components/Loading.vue";
 
+const isLoading = ref(false);
 const search = ref("");
 const chats = ref([]);
 const selectedChat = ref(null);
 const newMessage = ref("");
-const sidebarOpen = ref(false);
 const isMobile = ref(false);
+const sidebarOpen = ref(true); // Open sidebar by default on mobile
 const authStore = useAuthStore();
 const user = computed(() => authStore.user);
 
-const filteredChats = computed(() =>
-  chats.value.filter((chat) =>
+const filteredChats = computed(() => {
+  return chats.value.filter((chat) =>
     chat.name.toLowerCase().includes(search.value.toLowerCase())
-  )
-);
-
-const classAside = computed(() => {
-  if (isMobile.value) {
-    return [
-      "flex flex-col border-r border-gray-200 bg-white transition-all fixed z-10 w-4/5 max-w-xs top-16 left-0 bottom-4 shadow-lg",
-      sidebarOpen.value ? "block" : "hidden",
-    ].join(" ");
-  }
-  return "flex flex-col border-r border-gray-200 bg-white transition-all w-80";
+  );
 });
-
-function selectChat(chat) {
-  selectedChat.value = chat;
-  if (isMobile.value) sidebarOpen.value = false;
-  fetchMessages(chat.id);
-}
 
 async function fetchChats() {
   if (!user.value) return;
+  isLoading.value = true;
   try {
     if (user.value.role === "ADMIN") {
       const res = await axios.get("/api/user/all", { withCredentials: true });
-
       chats.value = res.data
         .filter((u) => u.id !== user.value.id)
         .map((u) => ({
@@ -128,14 +143,16 @@ async function fetchChats() {
             u.username
           )}`,
           messages: [],
+          lastMessage: null,
         }));
     } else {
       chats.value = [
         {
-          id: 1, // id admin, bisa juga diambil dari config/global jika multi admin
+          id: 1,
           name: "admin",
           avatar: `https://ui-avatars.com/api/?name=admin`,
           messages: [],
+          lastMessage: null,
         },
       ];
     }
@@ -144,6 +161,16 @@ async function fetchChats() {
     }
   } catch (err) {
     console.error("Error fetching chats:", err);
+  } finally {
+    isLoading.value = false;
+  }
+}
+
+function selectChat(chat) {
+  selectedChat.value = chat;
+  fetchMessages(chat.id);
+  if (isMobile.value) {
+    sidebarOpen.value = false; // Close sidebar on mobile when a chat is selected
   }
 }
 
@@ -164,14 +191,20 @@ async function fetchMessages(chatUserId) {
         text: msg.content,
         fromMe: msg.senderId === user.value.id,
         status: "received",
+        senderId: msg.senderId,
+        receiverId: msg.receiverId,
+        createdAt: msg.createdAt,
       }));
+
+      selectedChat.value.lastMessage = {
+        text: res.data[res.data.length - 1].content,
+        from: res.data[res.data.length - 1].senderId,
+        to: res.data[res.data.length - 1].receiverId,
+        createdAt: res.data[res.data.length - 1].createdAt,
+      };
     }
   } catch (err) {
-    if (err.response && err.response.status === 404) {
-      if (selectedChat.value) selectedChat.value.messages = [];
-    } else {
-      console.error("Error fetching messages:", err);
-    }
+    console.error("Error fetching messages:", err);
   }
 }
 
@@ -183,82 +216,77 @@ async function sendMessage() {
       content: newMessage.value,
     };
 
-    const tempMessage = {
+    selectedChat.value.messages.push({
       id: Date.now(),
       text: newMessage.value,
       fromMe: true,
-      status: "sending", // Status awal adalah "sending"
+      status: "sending",
+      senderId: user.value.id,
+      receiverId: selectedChat.value.id,
+      createdAt: new Date().toISOString(),
+    });
+
+    selectedChat.value.lastMessage = {
+      text: newMessage.value,
+      from: user.value.id,
+      to: selectedChat.value.id,
     };
 
-    selectedChat.value.messages.push(tempMessage);
-    newMessage.value = "";
-
     try {
-      const res = await axios.post("/api/chat/send", payload, {
-        withCredentials: true,
-      });
-      tempMessage.status = "received"; // Ubah status setelah berhasil dikirim
-      tempMessage.id = res.data.id;
-
-      // Kirim pesan melalui WebSocket ke penerima
+      await axios.post("/api/chat/send", payload, { withCredentials: true });
+      const lastMessage =
+        selectedChat.value.messages[selectedChat.value.messages.length - 1];
+      lastMessage.status = "sent";
       socket.emit("private message", {
-        to: selectedChat.value.id, // receiver ID
-        from: user.value.id, // sender ID
-        message: res.data.content, // message content
+        to: selectedChat.value.id,
+        message: newMessage.value,
+        from: user.value.id,
       });
+      newMessage.value = "";
     } catch (err) {
-      tempMessage.status = "error"; // Status pesan jika terjadi error
       console.error("Error sending message:", err);
     }
   }
 }
 
-function handleResize() {
-  isMobile.value = window.innerWidth <= 768;
-  if (!isMobile.value) sidebarOpen.value = false;
+function handleNewMessage(data) {
+  const { from, message } = data;
+
+  if (selectedChat.value && selectedChat.value.id === from) {
+    selectedChat.value.messages.push({
+      id: Date.now(),
+      text: message,
+      fromMe: false,
+      status: "received",
+      senderId: from,
+      receiverId: user.value.id,
+      createdAt: new Date().toISOString(),
+    });
+
+    selectedChat.value.lastMessage = {
+      text: message,
+      from: from,
+      to: user.value.id,
+    };
+  }
 }
 
-// Function to handle Socket.IO connection
-function handleSocket() {
-  if (!user.value) return;
-
-  // Register the socket (only once when the user logs in)
-  socket.emit("register", user.value.id);
-  console.log("Socket registered for user:", user.value.id);
-
-  // Ensure the event listener is only added once
-  socket.off("new_message"); // Remove previous listeners
-  socket.on("new_message", (msg) => {
-    console.log("Received new message:", msg); // Log the incoming message
-
-    // Check if the selected chat is the receiver of the message
-    if (selectedChat.value && msg.senderId === selectedChat.value.id) {
-      // Add the new message to the selected chat messages
-      selectedChat.value.messages.push({
-        id: Date.now(), // Unique ID for the new message
-        text: msg.message, // Message content
-        fromMe: false, // This message is from the other user
-        status: "received", // Status of the message when received
-      });
-
-      // Scroll to the latest message
-      nextTick(() => {
-        const messageContainer = document.querySelector("section");
-        messageContainer.scrollTop = messageContainer.scrollHeight;
-      });
-    }
-  });
+function handleResize() {
+  isMobile.value = window.innerWidth <= 768;
 }
 
 onMounted(async () => {
-  await fetchChats(); // Fetch chats dari API
-  handleResize(); // Update status mobile
-  window.addEventListener("resize", handleResize); // Tambahkan listener resize
-  handleSocket(); // Inisialisasi socket dan daftar event
+  handleResize();
+  window.addEventListener("resize", handleResize);
+  await fetchChats();
+  if (user.value) {
+    socket.emit("register", user.value.id);
+    socket.on("new_message", handleNewMessage);
+  }
 });
 
 onBeforeUnmount(() => {
   window.removeEventListener("resize", handleResize);
-  socket.off("new_message"); // Bersihkan listener saat komponen di-unmount
+  socket.off("new_message", handleNewMessage);
 });
 </script>

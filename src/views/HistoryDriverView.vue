@@ -54,7 +54,7 @@
 import { useAuthStore } from "@/stores/store";
 import axios from "axios";
 import { onMounted, computed, ref } from "vue";
-import { formatDate } from "@/utils";
+import { formatDate } from "@/utils/utils/utils";
 
 const authStore = useAuthStore();
 const user = computed(() => authStore.user);
