@@ -31,11 +31,8 @@
 import TableTrips from "@/components/TableTrips.vue";
 import Loading from "@/components/Loading.vue";
 import Pagination from "@/components/Pagination.vue";
-import { useAuthStore } from "@/stores/store";
 import axios from "axios";
-import { onMounted, computed, ref } from "vue";
-const authStore = useAuthStore();
-const user = computed(() => authStore.user);
+import { onMounted, ref } from "vue";
 const trips = ref([]);
 const selectedTrip = ref(null);
 const isLoading = ref(false);

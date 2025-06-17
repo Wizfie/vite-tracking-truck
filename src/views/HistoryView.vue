@@ -1,90 +1,121 @@
 <template>
   <div
-    class="flex flex-col items-center min-h-screen bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200"
+    class="container px-4 mx-auto mt-4 flex flex-col min-h-screen bg-white dark:bg-gray-900"
   >
-    <h1 class="text-3xl font-bold mt-2 mb-4">Riwayat Perjalanan</h1>
-    <div v-if="!locations || locations.length === 0">
-      <p class="text-lg mb-6">Belum ada riwayat perjalanan</p>
-      <p class="text-sm text-gray-500 dark:text-gray-400">
-        <router-link
-          class="text-blue-500 hover:underline"
-          :to="{ name: 'home' }"
-        >
-          &gt;&gt; Klik untuk mulai perjalanan &lt;&lt;
-        </router-link>
-      </p>
-    </div>
-    <div v-else class="w-full max-w-2xl">
-      <div
-        v-for="trip in locations.trips"
-        :key="trip.id"
-        class="bg-white dark:bg-gray-800 rounded-lg shadow-md mb-6 p-4"
-      >
-        <router-link
-          :to="{
-            name: 'checkpoint-detail',
-            query: { tripId: trip.id },
-          }"
-          class="block hover:bg-blue-50 dark:hover:bg-gray-700 rounded px-2 py-1 mb-2"
-        >
-          <div class="flex flex-col md:flex-row md:items-center md:gap-4">
-            <div class="font-semibold text-lg mb-1">Trip ID: {{ trip.id }}</div>
-            <div class="text-sm text-gray-500 dark:text-gray-400 mb-1">
-              Kendaraan: {{ trip.vehicle?.platNumber || "-" }} ({{
-                trip.vehicle?.brand || "-"
-              }})
-            </div>
-            <div class="text-sm text-gray-500 dark:text-gray-400 mb-1">
-              Driver: {{ trip.user?.username || "-" }}
-            </div>
-            <div class="text-sm text-gray-500 dark:text-gray-400 mb-1">
-              Mulai: {{ formatDate(trip.startTime) }}
-              <span v-if="trip.endTime"
-                >&nbsp;|&nbsp;Selesai: {{ formatDate(trip.endTime) }}</span
-              >
-            </div>
-          </div>
-        </router-link>
-      </div>
+    <Loading :is-loading="isLoading" />
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 mt-6">
+      <TableTrips
+        :trips="trips"
+        :selectedTrip="selectedTrip"
+        :sort-by="sortBy"
+        :sort-order="sortOrder"
+        @select-trip="selectTrip"
+        @search="handleSearch"
+        @sort="handleSort"
+        @items-per-page="handleItemsPerPage"
+      />
+      <Pagination
+        :current-page="currentPage"
+        :total-pages="totalPages"
+        :items-per-page="itemsPerPage"
+        @prev="handlePrev"
+        @next="handleNext"
+        @page="handlePage"
+        @items-per-page="handleItemsPerPage"
+      />
     </div>
   </div>
 </template>
 
 <script setup>
-import { useAuthStore } from "@/stores/store";
+import TableTrips from "@/components/TableTrips.vue";
+import Loading from "@/components/Loading.vue";
+import Pagination from "@/components/Pagination.vue";
 import axios from "axios";
 import { onMounted, computed, ref } from "vue";
-import { formatDate } from "@/utils";
+const trips = ref([]);
+const selectedTrip = ref(null);
+const isLoading = ref(false);
+const currentPage = ref(1);
+const totalPages = ref(1);
+const searchQuery = ref("");
+const sortBy = ref("startTime");
+const sortOrder = ref("desc");
+const status = ref("FINISH");
+const itemsPerPage = ref(10);
 
-const authStore = useAuthStore();
-const user = computed(() => authStore.user);
-const locations = ref([]);
-const getHistory = async () => {
+const getTrips = async (page = 1, query = searchQuery.value) => {
+  isLoading.value = true;
   try {
-    const active = false;
-    const res = await axios.get(
-      `/api/trip/user/${user.value.id}?active=${active}`,
-      { withCredentials: true }
-    );
-    console.log(res.data);
-    locations.value = res.data;
+    const res = await axios.get("/api/trip/all", {
+      params: {
+        page,
+        limit: itemsPerPage.value,
+        search: query,
+        sortBy: sortBy.value,
+        sortOrder: sortOrder.value,
+        status: status.value,
+      },
+      withCredentials: true,
+    });
+    trips.value = res.data.trips;
+    totalPages.value = res.data.totalPages;
+    currentPage.value = res.data.page;
+    // console.log(
+    //   "Set currentPage:",
+    //   currentPage.value,
+    //   "Set totalPages:",
+    //   totalPages.value
+    // );
   } catch (error) {
-    console.error("Error fetching history:", error);
+    console.error("Error fetching active trips:", error);
+  } finally {
+    isLoading.value = false;
   }
 };
 
-onMounted(() => {
-  if (user.value) {
-    getHistory();
+const selectTrip = (tripId) => {
+  selectedTrip.value = tripId;
+};
+
+const handleSearch = (query) => {
+  searchQuery.value = query;
+  getTrips(1, query);
+};
+
+const handleSort = (column) => {
+  if (sortBy.value === column) {
+    sortOrder.value = sortOrder.value === "asc" ? "desc" : "asc";
+  } else {
+    sortBy.value = column;
+    sortOrder.value = "asc";
   }
+  getTrips(1, searchQuery.value);
+};
+
+const handleItemsPerPage = (limit) => {
+  itemsPerPage.value = limit;
+  getTrips(1, searchQuery.value);
+};
+
+const handlePrev = () => {
+  if (currentPage.value > 1) getTrips(currentPage.value - 1, searchQuery.value);
+};
+const handleNext = () => {
+  if (currentPage.value < totalPages.value)
+    getTrips(currentPage.value + 1, searchQuery.value);
+};
+const handlePage = (page) => {
+  getTrips(page, searchQuery.value);
+};
+
+onMounted(() => {
+  getTrips();
 });
 </script>
 
-<style scoped>
-.bg-white {
-  background-color: #fff;
-}
-.dark .bg-white {
-  background-color: #23272f;
+<style>
+.selected-row {
+  background-color: #e0f7fa !important;
 }
 </style>

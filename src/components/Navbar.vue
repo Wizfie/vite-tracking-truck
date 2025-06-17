@@ -100,7 +100,14 @@ const logout = async () => {
             >Home</router-link
           >
           <router-link
+            v-if="user?.role === 'USER'"
             :to="{ name: 'history-driver' }"
+            class="text-gray-700 transition-all duration-300 transform dark:text-gray-200 hover:text-blue-500 dark:hover:text-blue-400 p-2 rounded-md font-semibold border-b-2 border-transparent hover:border-blue-500"
+            >History</router-link
+          >
+          <router-link
+            v-if="user?.role === 'ADMIN'"
+            :to="{ name: 'history' }"
             class="text-gray-700 transition-all duration-300 transform dark:text-gray-200 hover:text-blue-500 dark:hover:text-blue-400 p-2 rounded-md font-semibold border-b-2 border-transparent hover:border-blue-500"
             >History</router-link
           >
@@ -110,10 +117,10 @@ const logout = async () => {
             href="#"
             >Profile</router-link
           >
-          <a
+          <router-link
+            :to="{ name: 'chat' }"
             class="text-gray-700 transition-all duration-300 transform dark:text-gray-200 hover:text-blue-500 dark:hover:text-blue-400 p-2 rounded-md font-semibold border-b-2 border-transparent hover:border-blue-500"
-            href="#"
-            >Chat</a
+            >Chat</router-link
           >
           <button
             v-if="isLoggedIn"
@@ -186,10 +193,10 @@ const logout = async () => {
             href="#"
             >Profile</a
           >
-          <a
+          <router-link
+            :to="{ name: 'chat' }"
             class="text-gray-700 transition-all duration-300 transform bg-gray-200 dark:bg-slate-500 p-2 font-bold rounded-md dark:text-gray-200 hover:text-blue-500 dark:hover:text-blue-400"
-            href="#"
-            >Chat</a
+            >Chat</router-link
           >
           <!-- Dark mode toggle button in mobile menu -->
           <button
